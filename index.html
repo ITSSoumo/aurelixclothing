@@ -1,781 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Aurelix Clothing Catalog</title>
-<style>
-  /* Reset and base */
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: white;
-    color: black;
-    min-height: 100vh;
-    padding: 0 1rem 1rem;
-  }
-  header {
-    position: sticky;
-    top: 0;
-    background: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #ccc;
-    z-index: 20;
-  }
-  header h1 {
-    margin: 0;
-    font-weight: 900;
-    letter-spacing: 0.1rem;
-    font-size: 1.8rem;
-    color: black;
-    flex: 1;
-  }
-  /* Hamburger Menu for modes */
-  #modeMenuBtn {
-    cursor: pointer;
-    width: 28px;
-    height: 22px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 21;
-  }
-  #modeMenuBtn span {
-    height: 3px;
-    background: black;
-    border-radius: 2px;
-    display: block;
-  }
-
-  /* Mode menu dropdown */
-  #modeMenu {
-    position: fixed;
-    top: 58px;
-    right: 10px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    z-index: 25;
-    width: 160px;
-    display: none;
-    flex-direction: column;
-  }
-  #modeMenu.visible {
-    display: flex;
-  }
-  #modeMenu button {
-    background: none;
-    border: none;
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 1rem;
-    cursor: pointer;
-    color: black;
-    width: 100%;
-  }
-  #modeMenu button:hover,
-  #modeMenu button.active {
-    background-color: #efefef;
-    font-weight: 700;
-  }
-
-  #productForm {
-    background: #f5f5f5;
-    border: 1px solid #ccc;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 8px;
-    display: none;
-    z-index: 10;
-  }
-  #productForm.visible {
-    display: block;
-  }
-  #productForm label {
-    display: block;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-    color: black;
-  }
-  #productForm input[type=text],
-  #productForm input[type=number] {
-    width: 100%;
-    padding: 0.4rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    font-style: normal;
-    color: black;
-  }
-  /* Visible file input for add form */
-  #productForm input[type=file] {
-    width: 100%;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    background: #eee;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 0.3rem 0.4rem;
-    color: black;
-    font-style: normal;
-  }
-  #productForm button {
-    background: black;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    font-weight: 700;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 1.1rem;
-    transition: background-color 0.2s ease;
-  }
-  #productForm button:hover {
-    background-color: #333;
-  }
-
-  main {
-    flex: 1;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-  }
-  .product-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  .product-item {
-    background: #fafafa;
-    border-radius: 12px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-    position: relative;
-  }
-  .product-image-container {
-    width: 100%;
-    max-height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #ddd;
-    border: 1px solid #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-  .product-image-container img {
-    width: auto;
-    height: 100%;
-    object-fit: contain;
-    user-select: none;
-  }
-  /* Hide file inputs from product cards */
-  .product-image-container input[type=file] {
-    display: none;
-  }
-
-  .product-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-  .product-info input {
-    background: transparent;
-    border: none;
-    color: black;
-    font-weight: 700;
-    font-size: 1.1rem;
-    font-style: italic;
-    padding: 0;
-    margin: 0;
-    cursor: default;
-    user-select: text;
-  }
-  .product-info input[readonly] {
-    cursor: default;
-  }
-  .product-info input.editable {
-    border-bottom: 1px dashed #999;
-    cursor: text;
-  }
-  .price-container {
-    font-weight: 700;
-    font-size: 1.1rem;
-    font-family: monospace;
-    color: black;
-    margin-top: 0.2rem;
-    line-height: 1.3;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .price-base,
-  .price-gst-amount,
-  .price-total {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .price-label {
-    font-weight: 600;
-    color: #555;
-    font-size: 0.85rem;
-    min-width: 70px;
-  }
-  .currency-icon {
-    font-weight: 700;
-    font-style: normal;
-  }
-  .price-value {
-    color: black;
-    font-weight: 700;
-  }
-  .price-gst-amount {
-    color: #444;
-    font-weight: 500;
-    font-style: italic;
-    font-size: 0.95rem;
-  }
-  .price-total {
-    color: black;
-    font-weight: 800;
-    font-size: 1.15rem;
-  }
-
-  /* Delete mode checkbox */
-  .delete-checkbox {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    transform: scale(1.3);
-    cursor: pointer;
-    display: none;
-  }
-  .product-item.delete-mode .delete-checkbox {
-    display: block;
-  }
-
-  /* Delete selected button */
-  #deleteSelectedBtn {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: crimson;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-    display: none;
-    z-index: 30;
-  }
-  #deleteSelectedBtn:hover {
-    background: darkred;
-  }
-
-  /* Modal styles */
-  #imageModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right:0;
-    bottom:0;
-    background-color: rgba(0,0,0,0.85);
-    display: none;
-    justify-content:center;
-    align-items:center;
-    z-index: 1000;
-  }
-  #imageModal.visible {
-    display: flex;
-  }
-  #imageModal img {
-    max-width: 90vw;
-    max-height: 90vh;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255,255,255,0.5);
-    user-select: none;
-  }
-  #modalCloseBtn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #fff;
-    border: none;
-    padding: 0.3rem 0.6rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 1001;
-    color: #333;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-  #modalCloseBtn:hover {
-    background: #ddd;
-  }
-
-  @media (max-width: 500px) {
-    /* Force 2 columns on mobile devices */
-    .product-list {
-      grid-template-columns: repeat(2, 1fr);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurelix Clothing</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: white;
+      color: rgb(22, 22, 22);
     }
-    #deleteSelectedBtn {
-      width: calc(100% - 40px);
-      left: 20px;
-      transform: none;
+    header {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
     }
-  }
-</style>
+    .brand {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .tagline {
+      font-family: 'Alex Brush', cursive;
+      font-size: 1.3rem;
+      margin-top: 0.2rem;
+      font-style: initial;
+      color: rgb(122, 121, 121);
+    }
+    nav {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+    .menu-toggle {
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+    .menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 2.5rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    .menu a {
+      display: block;
+      padding: 0.75rem;
+      text-decoration: none;
+      color: black;
+    }
+    .menu a:hover {
+      background-color: #f0f0f0;
+    }
+    .container {
+      padding: 1rem;
+    }
+    .form-section {
+      margin: 1rem 0;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .product {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .product img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .lightbox span {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+    select, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    input[type="file"] {
+      margin-bottom: 0.5rem;
+    }
+    button {
+      background-color: black;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+    .sub-btns button {
+      margin: 0.25rem;
+      background-color: #555;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
-<header>
-  <h1>Aurelix Clothing</h1>
-  <div id="modeMenuBtn" title="Menu" aria-label="Open menu" role="button" tabindex="0">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <nav id="modeMenu" aria-label="Mode selection menu">
-    <button id="homeModeBtn" type="button">Home</button>
-    <button id="addModeBtn" type="button">Add Products</button>
-    <button id="editModeBtn" type="button">Edit Products</button>
-    <button id="deleteModeBtn" type="button">Delete Products</button>
+  <header>
+    <div class="brand">AURELIX</div>
+    <div class="tagline">Sapne Jo Pehne Jaate Hai</div>
+  </header>
+  <nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <div class="menu" id="menu">
+      <a href="#" onclick="showSection('home')">Home</a>
+      <a href="#" onclick="showSection('add')">Add Products</a>
+      <a href="#" onclick="showSection('edit')">Edit Product</a>
+      <a href="#" onclick="showSection('delete')">Delete Product</a>
+    </div>
   </nav>
-</header>
 
-<section id="productForm" aria-hidden="true" aria-label="Add product form">
-  <label for="productName">Product Name</label>
-  <input type="text" id="productName" placeholder="Enter product name" autocomplete="off" required />
-  
-  <label for="productPrice">Product Price</label>
-  <input type="number" id="productPrice" min="0" step="0.01" placeholder="Enter price" required />
-  
-  <label for="productGst">GST % (optional)</label>
-  <input type="number" id="productGst" min="0" step="0.01" placeholder="Enter GST percentage (e.g. 18)" />
-  
-  <label for="productImage">Product Image</label>
-  <input type="file" id="productImage" accept="image/*" aria-describedby="imgHelpText" />
-  <small id="imgHelpText" style="color:#666;">Optional. Upload an image (max ~1MB recommended).</small>
-  
-  <button id="addProductBtn">Add Product</button>
-</section>
+  <div class="container">
+    <div id="add" class="form-section" style="display:none">
+      <h2>Add Product</h2>
+      <select id="gender" onchange="populateCategory()">
+        <option value="">Select Gender</option>
+        <option value="Women">Women</option>
+        <option value="Men">Men</option>
+      </select>
+      <select id="category"></select>
+      <input type="text" id="productName" placeholder="Product Name" />
+      <input type="number" id="price" placeholder="Price ₹" />
+      <input type="number" id="gst" placeholder="GST %" />
+      <input type="file" id="image" accept="image/*" />
+      <button onclick="addProduct()">Add</button>
+    </div>
 
-<main>
-  <div class="product-list" id="productList" aria-live="polite" aria-relevant="additions removals" tabindex="0" role="list">
-    <!-- Products will appear here -->
+    <div id="home" class="form-section">
+      <h2>Products</h2>
+      <div>
+        <button onclick="filterByGender('Women')">Women</button>
+        <button onclick="filterByGender('Men')">Men</button>
+      </div>
+      <div id="subcategories" class="sub-btns"></div>
+      <div class="products" id="productList"></div>
+    </div>
+
+    <div id="edit" class="form-section" style="display:none">
+      <h2>Edit Product</h2>
+      <select id="editSelect"></select>
+      <input type="text" id="editName" placeholder="New Name" />
+      <input type="number" id="editPrice" placeholder="New Price ₹" />
+      <input type="number" id="editGst" placeholder="New GST %" />
+      <input type="file" id="editimage" accept="New image/*" />
+      <button onclick="editProduct()">Update</button>
+    </div>
+
+    <div id="delete" class="form-section" style="display:none">
+      <h2>Delete Product</h2>
+      <select id="deleteSelect"></select>
+      <button onclick="deleteProduct()">Delete</button>
+    </div>
   </div>
-</main>
-<!-- Delete selection confirm -->
-<button id="deleteSelectedBtn" aria-label="Delete selected products">Delete Selected</button>
 
-<!-- Image Modal -->
-<div id="imageModal" aria-modal="true" role="dialog" aria-label="Enlarged product image">
-  <button id="modalCloseBtn" aria-label="Close image modal">&times;</button>
-  <img src="" alt="Product large preview" />
-</div>
+  <div class="lightbox" id="lightbox">
+    <span onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" />
+  </div>
 
-<script>
-  const modeMenuBtn = document.getElementById("modeMenuBtn");
-  const modeMenu = document.getElementById("modeMenu");
-  const homeModeBtn = document.getElementById("homeModeBtn");
-  const addModeBtn = document.getElementById("addModeBtn");
-  const editModeBtn = document.getElementById("editModeBtn");
-  const deleteModeBtn = document.getElementById("deleteModeBtn");
+  <script>
+    const products = [];
 
-  const productForm = document.getElementById("productForm");
-  const addProductBtn = document.getElementById("addProductBtn");
-  const productList = document.getElementById("productList");
-  const productNameInput = document.getElementById("productName");
-  const productPriceInput = document.getElementById("productPrice");
-  const productGstInput = document.getElementById("productGst");
-  const productImageInput = document.getElementById("productImage");
-  const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
-
-  const imageModal = document.getElementById('imageModal');
-  const modalCloseBtn = document.getElementById('modalCloseBtn');
-  const modalImage = imageModal.querySelector('img');
-
-  const STORAGE_KEY = 'aurelix_clothing_products';
-
-  let products = [];
-  let mode = 'home'; // modes: 'home', 'add', 'edit', 'delete'
-
-  function formatNumber(num) {
-    return num.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  }
-
-  function totalPrice(basePrice, gstPercent) {
-    if (gstPercent > 0) {
-      return +(basePrice * (1 + gstPercent / 100)).toFixed(2);
-    } else {
-      return +basePrice.toFixed(2);
-    }
-  }
-
-  function loadProducts() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  }
-
-  function saveProducts(products) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-  }
-
-  function openImageModal(src, alt) {
-    modalImage.src = src;
-    modalImage.alt = alt;
-    imageModal.classList.add('visible');
-    modalCloseBtn.focus();
-  }
-
-  function closeImageModal() {
-    imageModal.classList.remove('visible');
-    modalImage.src = '';
-    modalImage.alt = '';
-  }
-
-  modalCloseBtn.addEventListener('click', closeImageModal);
-  imageModal.addEventListener('click', e => {
-    if (e.target === imageModal) {
-      closeImageModal();
-    }
-  });
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && imageModal.classList.contains('visible')) {
-      closeImageModal();
-    }
-  });
-
-  function createPriceRow(labelText, valueText) {
-    const row = document.createElement('div');
-    row.className = labelText === 'GST %' ? 'price-gst-amount' : (labelText === 'Total Price' ? 'price-total' : 'price-base');
-    const label = document.createElement('span');
-    label.className = 'price-label';
-    label.textContent = labelText;
-    const currency = document.createElement('span');
-    currency.className = 'currency-icon';
-    currency.textContent = '₹';
-    const value = document.createElement('span');
-    value.className = 'price-value';
-    value.textContent = valueText;
-    row.appendChild(label);
-    row.appendChild(currency);
-    row.appendChild(value);
-    return row;
-  }
-
-  function createProductElement(product, index) {
-    const div = document.createElement('div');
-    div.className = 'product-item';
-    if(mode === 'delete'){
-      div.classList.add('delete-mode');
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
 
-    // Delete checkbox for delete mode
-    const deleteCheckbox = document.createElement('input');
-    deleteCheckbox.type = 'checkbox';
-    deleteCheckbox.className = 'delete-checkbox';
-    deleteCheckbox.setAttribute('aria-label', `Select to delete product ${product.name}`);
-    deleteCheckbox.dataset.index = index;
-    if(mode === 'delete'){
-      deleteCheckbox.style.display = 'block';
-    } else {
-      deleteCheckbox.style.display = 'none';
-    }
-    div.appendChild(deleteCheckbox);
-
-    const imageContainer = document.createElement('div');
-    imageContainer.className = 'product-image-container';
-    const img = document.createElement('img');
-    img.alt = product.name + " image";
-    img.src = product.image || 'https://via.placeholder.com/320x320/ddd/333?text=No+Image';
-    imageContainer.appendChild(img);
-
-    // Clicking image opens modal with large view ONLY
-    img.addEventListener('click', () => {
-      openImageModal(img.src, img.alt);
-    });
-    div.appendChild(imageContainer);
-
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'product-info';
-
-    // Name input editable only in edit mode
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.value = product.name;
-    nameInput.readOnly = (mode !== 'edit');
-    nameInput.classList.toggle('editable', mode === 'edit');
-    if(mode === 'edit'){
-      nameInput.setAttribute('aria-label', `Edit product name for ${product.name}`);
-      nameInput.style.cursor = 'text';
-    } else {
-      nameInput.setAttribute('aria-label', `Product name: ${product.name}`);
-      nameInput.style.cursor = 'default';
-    }
-    nameInput.addEventListener('change', e => {
-      if(mode === 'edit'){
-        products[index].name = e.target.value.trim() || 'Unnamed Product';
-        saveProducts(products);
-        renderProducts();
-      }
-    });
-    infoDiv.appendChild(nameInput);
-
-    // Price input editable only in edit mode
-    const priceInput = document.createElement('input');
-    priceInput.type = 'number';
-    priceInput.min = '0';
-    priceInput.step = '0.01';
-    priceInput.value = product.basePrice.toFixed(2);
-    priceInput.readOnly = (mode !== 'edit');
-    priceInput.classList.toggle('editable', mode === 'edit');
-    if(mode === 'edit'){
-      priceInput.setAttribute('aria-label', `Edit product price for ${product.name}`);
-      priceInput.style.cursor = 'text';
-    } else {
-      priceInput.setAttribute('aria-label', `Product price: ${product.basePrice.toFixed(2)}`);
-      priceInput.style.cursor = 'default';
-    }
-    priceInput.addEventListener('change', e => {
-      if(mode === 'edit'){
-        let val = parseFloat(e.target.value);
-        if(isNaN(val) || val < 0) val = 0;
-        products[index].basePrice = val;
-        saveProducts(products);
-        renderProducts();
-      }
-    });
-    infoDiv.appendChild(priceInput);
-
-    // GST input editable only in edit mode
-    const gstInput = document.createElement('input');
-    gstInput.type = 'number';
-    gstInput.min = '0';
-    gstInput.step = '0.01';
-    gstInput.value = product.gst !== undefined ? product.gst.toString() : '';
-    gstInput.placeholder = 'GST %';
-    gstInput.readOnly = (mode !== 'edit');
-    gstInput.classList.toggle('editable', mode === 'edit');
-    if(mode === 'edit'){
-      gstInput.setAttribute('aria-label', `Edit GST percentage for ${product.name}`);
-      gstInput.style.cursor = 'text';
-    } else {
-      gstInput.setAttribute('aria-label', `GST percentage: ${product.gst ?? 0}`);
-      gstInput.style.cursor = 'default';
-    }
-    gstInput.addEventListener('change', e => {
-      if(mode === 'edit'){
-        let val = parseFloat(e.target.value);
-        if(isNaN(val) || val < 0) val = 0;
-        products[index].gst = val;
-        saveProducts(products);
-        renderProducts();
-      }
-    });
-    infoDiv.appendChild(gstInput);
-
-    // Price container with Price, GST %, and Total Price with icons and labels
-    const priceContainer = document.createElement('div');
-    priceContainer.className = 'price-container';
-    // Price row
-    const priceRow = createPriceRow('Price', product.basePrice.toFixed(2));
-    priceContainer.appendChild(priceRow);
-    // GST row, only if gst > 0
-    if(product.gst && product.gst > 0){
-      const gstRow = createPriceRow('GST %', product.gst.toFixed(2));
-      priceContainer.appendChild(gstRow);
-    }
-    // Total price row
-    const total = totalPrice(product.basePrice, (product.gst || 0));
-    const totalRow = createPriceRow('Total Price', total.toFixed(2));
-    priceContainer.appendChild(totalRow);
-
-    infoDiv.appendChild(priceContainer);
-
-    div.appendChild(infoDiv);
-
-    return div;
-  }
-
-  function renderProducts() {
-    productList.innerHTML = '';
-    if(products.length === 0){
-      const emptyMsg = document.createElement('p');
-      emptyMsg.textContent = 'No products in catalog. Use the menu to add products.';
-      emptyMsg.style.color = '#444';
-      productList.appendChild(emptyMsg);
-      return;
-    }
-    products.forEach((p, idx) => {
-      productList.appendChild(createProductElement(p, idx));
-    });
-
-    if (mode === 'delete') {
-      deleteSelectedBtn.style.display = 'block';
-      updateDeleteButtonState();
-    } else {
-      deleteSelectedBtn.style.display = 'none';
-    }
-  }
-
-  function toggleModeMenu() {
-    modeMenu.classList.toggle('visible');
-  }
-
-  function closeModeMenu() {
-    modeMenu.classList.remove('visible');
-  }
-
-  function setMode(newMode) {
-    mode = newMode;
-    closeModeMenu();
-
-    // Update active button style
-    homeModeBtn.classList.toggle('active', mode === 'home');
-    addModeBtn.classList.toggle('active', mode === 'add');
-    editModeBtn.classList.toggle('active', mode === 'edit');
-    deleteModeBtn.classList.toggle('active', mode === 'delete');
-
-    // Show/hide add product form only in add mode
-    if (mode === 'add') {
-      productForm.classList.add('visible');
-      productForm.setAttribute('aria-hidden', 'false');
-      productNameInput.focus();
-    } else {
-      productForm.classList.remove('visible');
-      productForm.setAttribute('aria-hidden', 'true');
+    function showSection(sectionId) {
+      const sections = ['home', 'add', 'edit', 'delete'];
+      sections.forEach(id => {
+        document.getElementById(id).style.display = id === sectionId ? 'block' : 'none';
+      });
+      if (sectionId === 'home') renderProducts();
+      if (sectionId === 'edit') populateEditSelect();
+      if (sectionId === 'delete') populateDeleteSelect();
     }
 
-    renderProducts();
-  }
-
-  function addProduct() {
-    const name = productNameInput.value.trim();
-    let price = parseFloat(productPriceInput.value);
-    let gstVal = parseFloat(productGstInput.value);
-
-    if (!name) {
-      alert('Please enter a product name.');
-      productNameInput.focus();
-      return;
-    }
-    if (isNaN(price) || price < 0) {
-      alert('Please enter a valid product price (0 or more).');
-      productPriceInput.focus();
-      return;
-    }
-    if (isNaN(gstVal) || gstVal < 0) {
-      gstVal = 0;
-    }
-    const file = productImageInput.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const imageData = event.target.result;
-        products.push({ name, basePrice: price, gst: gstVal, image: imageData });
-        saveProducts(products);
-        renderProducts();
-        resetForm();
-        setMode('home');
+    function filterByGender(gender) {
+      const subDiv = document.getElementById('subcategories');
+      const categories = {
+        Women: ['Saree', 'Kurti', 'Suits', 'Dupatta', 'Leggings', 'Tshirt', 'Gowns', 'Palazzo'],
+        Men: ["Jean's", 'Shirt', 'Tshirt', 'Pants', 'Trouser', 'Shorts', 'Blazzer', 'Sherwanis', 'Kurta']
       };
-      reader.readAsDataURL(file);
-    } else {
-      products.push({ name, basePrice: price, gst: gstVal, image: '' });
-      saveProducts(products);
+
+      subDiv.innerHTML = '';
+      categories[gender].forEach(sub => {
+        const btn = document.createElement('button');
+        btn.textContent = sub;
+        btn.onclick = () => {
+          const filtered = products.filter(p => p.gender === gender && p.category === sub);
+          renderProducts(filtered);
+        };
+        subDiv.appendChild(btn);
+      });
+
+      const filtered = products.filter(p => p.gender === gender);
+      renderProducts(filtered);
+    }
+
+    function populateCategory() {
+      const gender = document.getElementById('gender').value;
+      const category = document.getElementById('category');
+      const categories = {
+        Women: ['Saree', 'Kurti', 'Suits', 'Dupatta', 'Leggings', 'Tshirt', 'Gowns', 'Palazzo'],
+        Men: ["Jean's", 'Shirt', 'Tshirt', 'Pants', 'Trouser', 'Shorts', 'Blazzer', 'Sherwanis', 'Kurta']
+      };
+
+      category.innerHTML = '';
+      if (categories[gender]) {
+        categories[gender].forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat;
+          option.textContent = cat;
+          category.appendChild(option);
+        });
+      }
+    }
+
+    function addProduct() {
+      const gender = document.getElementById('gender').value;
+      const category = document.getElementById('category').value;
+      const name = document.getElementById('productName').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const gst = parseFloat(document.getElementById('gst').value);
+      const image = document.getElementById('image').files[0];
+
+      if (!gender || !category || !name || isNaN(price) || isNaN(gst) || !image) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        products.push({ gender, category, name, price, gst, image: e.target.result });
+        document.getElementById('productName').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('gst').value = '';
+        document.getElementById('image').value = '';
+        renderProducts();
+        showSection('home');
+      }
+      reader.readAsDataURL(image);
+    }
+
+    function renderProducts(list = products) {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+      list.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <img src="${p.image}" onclick="showLightbox('${p.image}')" />
+          <h4>${p.name}</h4>
+          <p>${p.gender} - ${p.category}</p>
+          <p>₹${p.price} + ${p.gst}% GST = ₹${(p.price + (p.price * p.gst / 100)).toFixed(2)}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function populateEditSelect() {
+      const select = document.getElementById('editSelect');
+      select.innerHTML = '';
+      products.forEach((p, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${p.name} (${p.gender} - ${p.category})`;
+        select.appendChild(option);
+      });
+    }
+
+    function editProduct() {
+      const index = document.getElementById('editSelect').value;
+      const name = document.getElementById('editName').value;
+      const price = parseFloat(document.getElementById('editPrice').value);
+      const gst = parseFloat(document.getElementById('editGst').value);
+
+      if (index === '') return;
+
+      if (name) products[index].name = name;
+      if (!isNaN(price)) products[index].price = price;
+      if (!isNaN(gst)) products[index].gst = gst;
+
       renderProducts();
-      resetForm();
-      setMode('home');
+      showSection('home');
     }
-  }
 
-  function resetForm() {
-    productNameInput.value = '';
-    productPriceInput.value = '';
-    productGstInput.value = '';
-    productImageInput.value = '';
-    productNameInput.focus();
-  }
-
-  function deleteSelectedProducts() {
-    if (!confirm('Are you sure you want to delete selected products?')) return;
-    const checkboxes = productList.querySelectorAll('.delete-checkbox:checked');
-    if (checkboxes.length === 0) {
-      alert('Please select at least one product to delete.');
-      return;
+    function populateDeleteSelect() {
+      const select = document.getElementById('deleteSelect');
+      select.innerHTML = '';
+      products.forEach((p, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${p.name} (${p.gender} - ${p.category})`;
+        select.appendChild(option);
+      });
     }
-    const indexesToDelete = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
-    indexesToDelete.sort((a,b)=>b-a);
-    for (const idx of indexesToDelete) {
-      products.splice(idx, 1);
+
+    function deleteProduct() {
+      const index = document.getElementById('deleteSelect').value;
+      if (index !== '') {
+        products.splice(index, 1);
+        populateDeleteSelect();
+        renderProducts();
+        showSection('home');
+      }
     }
-    saveProducts(products);
-    renderProducts();
-    updateDeleteButtonState();
-  }
 
-  function updateDeleteButtonState() {
-    const anyChecked = productList.querySelector('.delete-checkbox:checked') !== null;
-    deleteSelectedBtn.disabled = !anyChecked;
-  }
-
-  productList.addEventListener('change', (e) => {
-    if (e.target.classList.contains('delete-checkbox')) {
-      updateDeleteButtonState();
+    function showLightbox(src) {
+      const box = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      box.style.display = 'flex';
     }
-  });
 
-  modeMenuBtn.addEventListener('click', toggleModeMenu);
-  modeMenuBtn.addEventListener('keydown', e => {
-    if(e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleModeMenu();
+    function closeLightbox() {
+      document.getElementById('lightbox').style.display = 'none';
     }
-  });
-
-  homeModeBtn.addEventListener('click', () => setMode('home'));
-  addModeBtn.addEventListener('click', () => setMode('add'));
-  editModeBtn.addEventListener('click', () => setMode('edit'));
-  deleteModeBtn.addEventListener('click', () => setMode('delete'));
-
-  addProductBtn.addEventListener('click', addProduct);
-  deleteSelectedBtn.addEventListener('click', deleteSelectedProducts);
-
-  document.addEventListener('click', (e) => {
-    if(!modeMenu.contains(e.target) && e.target !== modeMenuBtn) {
-      closeModeMenu();
-    }
-  });
-
-  products = loadProducts();
-  setMode('home');
-  renderProducts();
-</script>
+  </script>
 </body>
 </html>
